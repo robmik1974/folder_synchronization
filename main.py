@@ -131,24 +131,16 @@ def manage_deleted_files(
 
 def synchronize_empty_folders(source_folder: str, replica_folder: str) -> None:
     source_folder_name = source_folder.split("/")[-1]
-    replica_folder_name = replica_folder.split("/")[-1]
-    for dir_path, _, _ in os.walk(source_folder):
-        if not os.listdir(dir_path):
-            replica_list = dir_path.split('/')
-            dest = "/".join(
-                replica_list[replica_list.index(source_folder_name)+1:]
-                )
-            if not os.path.exists(f"{replica_folder}/{dest}"):
-                os.mkdir(f"{replica_folder}/{dest}")
+    for dir_path, dirs, files in os.walk(source_folder):
+        path = dir_path.split(source_folder_name)[-1]
+        if not os.path.exists(f"{replica_folder}{path}"):
+            os.mkdir(f"{replica_folder}{path}")
 
-    for dir_path, _, _ in os.walk(replica_folder):
-        if not os.listdir(dir_path):
-            replica_list = dir_path.split('/')
-            dest = "/".join(
-                replica_list[replica_list.index(replica_folder_name)+1:]
-                )
-            if not os.path.exists(f"{source_folder}/{dest}"):
-                os.rmdir(f"{replica_folder}/{dest}")
+    replica_folder_name = replica_folder.split("/")[-1]
+    for dir_path, _, _ in os.walk(replica_folder, topdown=False):
+        path = dir_path.split(replica_folder_name)[-1]
+        if not os.path.exists(f"{source_folder}{path}"):
+            os.rmdir(f"{replica_folder}{path}")
 
 
 def main():
